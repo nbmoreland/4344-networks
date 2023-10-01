@@ -29,6 +29,9 @@ print(f"Server response: {status}")
 if status == "HTTP/1.1 200 OK":
     body = response[response.find("\r\n\r\n") + 4:]
     print(f"\n {body}")
+else:
+    print(f"Server response: {status}")
+    print(f"Response body: {response}")
 
 # Print RTT
 print(f"RTT: {time() - sentTime}")

@@ -49,14 +49,34 @@ def handle_client(connection, address):
         path = './pages' + file
 
     print(f"Requested file: {path}")
-    # Send the response
-    if os.path.exists(path):
-        with open(path, 'r') as f:
+
+    # 404 Status
+    if not os.path.exists(path):
+        response = "HTTP/1.1 404 Not Found\r\n"
+        response += "Content-Type: text/html\r\n\r\n"
+
+        with open("./pages/404.html", 'r') as f:
             body = f.read()
-            connection.send(
-                f"HTTP/1.1 200 OK\r\n\r\n{body}".encode(ENCODE_FORMAT))
-    else:
-        connection.send("HTTP/1.1 404 Not Found\r\n\r\n".encode(ENCODE_FORMAT))
+            print(f"Response body: {body}")
+            response += body
+
+        connection.send(response.encode(ENCODE_FORMAT))
+        connection.close()
+        return
+
+    # 301 Status
+    if file != "/" + FILE:
+        response = "HTTP/1.1 301 Moved Permanently\r\n"
+        response += f"Location: /{FILE}\r\n\r\n"
+        connection.send(response.encode(ENCODE_FORMAT))
+        connection.close()
+        return
+
+    # 200 Status
+    with open(path, 'r') as f:
+        body = f.read()
+        connection.send(
+            f"HTTP/1.1 200 OK\r\n\r\n{body}".encode(ENCODE_FORMAT))
 
     # Close the connection
     connection.close()
